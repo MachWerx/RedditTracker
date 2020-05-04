@@ -26,8 +26,7 @@ def main():
     from selenium.webdriver.chrome.options import Options
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    print('Initializing Chrome...', end='\r')
-    driver = webdriver.Chrome(options=chrome_options)
+    chrome_options.add_argument("--disk-cache-size=0")
   except AttributeError as e:
     print('This program needs ChromeDriver to browse websites. For more info, see:')
     print('  https://chromedriver.chromium.org/downloads')
@@ -44,45 +43,46 @@ def main():
   # Initialize log file
   with open(args.logfile, 'w') as file:
     file.write(',Upvotes,Comments,Awards\n')
-  
-  while True:
-    print('Grabbing web page...  ', end='\r')
-    driver.get(args.url)
-    
-    print('Parsing web page... ', end='\r')
-    tree = lxml.html.fromstring(driver.page_source)
-    
-    # time stamp data
-    data = [time.strftime('%Y/%m/%d %H:%M:%S')]
-    
-    # get upvotes and comment count
-    description = tree.xpath('//meta[@property="og:description"]/@content')[0]
-    votes = description.split(' votes ')[0].replace(',','')
-    data.append(votes)
-    comments = description.split('and')[1].split(' ')[1].replace(',','')
-    data.append(comments)
-    
-    # find badges
-    main_post = tree.xpath('//*[@class="' + args.post_class + '"]')[0]
-    award_ids = [s for s in main_post.xpath('.//*/@id') if 'PostAwardBadges' in s]
-    for award_id in award_ids:
-      award = main_post.xpath('.//*[@id="' + award_id + '"]')[0]
-      badge_type = award.xpath('.//@alt')[0]
-      data.append(badge_type)
-      badge_count = award.getparent()[1].text
-      if badge_count:
-        data.append(badge_count)
+
+  print('Initializing Chrome...', end='\r')
+  with webdriver.Chrome(options=chrome_options) as driver:
+    while True:
+      print('Grabbing web page...  ', end='\r')
+      driver.get(args.url)
+
+      print('Parsing web page... ', end='\r')
+      tree = lxml.html.fromstring(driver.page_source)
+
+      # time stamp data
+      data = [time.strftime('%Y/%m/%d %H:%M:%S')]
+
+      # get upvotes and comment count
+      description = tree.xpath('//meta[@property="og:description"]/@content')[0]
+      votes = description.split(' votes ')[0].replace(',','')
+      data.append(votes)
+      comments = description.split('and')[1].split(' ')[1].replace(',','')
+      data.append(comments)
+
+      # find badges
+      main_post = tree.xpath('//*[@class="' + args.post_class + '"]')[0]
+      award_ids = [s for s in main_post.xpath('.//*/@id') if 'PostAwardBadges' in s]
+      for award_id in award_ids:
+        award = main_post.xpath('.//*[@id="' + award_id + '"]')[0]
+        badge_type = award.xpath('.//@alt')[0]
+        data.append(badge_type)
+        badge_count = award.getparent()[1].text
+        if badge_count:
+          data.append(badge_count)
+        else:
+          data.append('1')
+      if len(data) > 1:
+        stats = ','.join(data)
+        with open(args.logfile, 'a') as file:
+          file.write(stats + '\n')
+        print(stats)
+        wait(60)  # add line to log and wait a minute
       else:
-        data.append('1')
-      
-    if len(data) > 1:
-      stats = ','.join(data)
-      with open(args.logfile, 'a') as file:
-        file.write(stats + '\n')
-      print(stats)
-      wait(60)  # add line to log and wait a minute
-    else:
-      wait(3)  # no data found, wait a few seconds and retry
+        wait(3)  # no data found, wait a few seconds and retry
 
 def wait(seconds):
   animation = '|/-\\'
