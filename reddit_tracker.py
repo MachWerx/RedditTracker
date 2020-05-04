@@ -3,12 +3,15 @@
 import sys
 import time
 import argparse
+import os.path
 
 def main():
   parser = argparse.ArgumentParser(description='Track stats on a Reddit post.')
   parser.add_argument('--post_class',
       default = 'uI_hDmU5GSiudtABRz_37 ',
       help='The class name for the main post.')
+  parser.add_argument('--profile_path',
+      help='If you want to log in as specific user, go to chrome://version/ in Chrome and pass in the profile path. You will probably want to create a new user directory for this.')
   parser.add_argument('url', help='The URL to track')
   parser.add_argument('logfile', help='The file the log should be saved to')
   args = parser.parse_args()
@@ -26,7 +29,13 @@ def main():
     from selenium.webdriver.chrome.options import Options
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disk-cache-size=0")
+    if args.profile_path:
+      dir = os.path.dirname(args.profile_path)
+      profile = os.path.basename(args.profile_path)
+      print('user data dir', dir)
+      print('profile', profile)
+      chrome_options.add_argument("--user-data-dir=" + dir + "");
+      chrome_options.add_argument("--profile-directory=" + profile + "");
   except AttributeError as e:
     print('This program needs ChromeDriver to browse websites. For more info, see:')
     print('  https://chromedriver.chromium.org/downloads')
