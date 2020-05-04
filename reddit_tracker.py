@@ -41,10 +41,6 @@ def main():
     print('  https://lxml.de/installation.html')
     sys.exit()
     
-  upvote_delimiter = args.upvote
-  awards_delimiter = args.awards
-  comments_delimiter = args.comments
-
   # Initialize log file
   with open(args.logfile, 'w') as file:
     file.write(',Upvotes,Comments,Awards\n')
