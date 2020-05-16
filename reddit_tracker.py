@@ -28,7 +28,7 @@ def main():
   try:
     from selenium.webdriver.chrome.options import Options
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    #chrome_options.add_argument("--headless")
     if args.profile_path:
       dir = os.path.dirname(args.profile_path)
       profile = os.path.basename(args.profile_path)
@@ -48,10 +48,10 @@ def main():
     print('This program needs lxml to parse websites. For more info, see:')
     print('  https://lxml.de/installation.html')
     sys.exit()
-    
+
   # Initialize log file
-  with open(args.logfile, 'w') as file:
-    file.write(',Upvotes,Comments,Awards\n')
+  #with open(args.logfile, 'w') as file:
+  #    file.write(',Upvotes,Comments,Awards\n')
 
   print('Initializing Chrome...', end='\r')
   with webdriver.Chrome(options=chrome_options) as driver:
