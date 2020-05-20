@@ -27,6 +27,7 @@ def main():
   # use chromedriver
   try:
     from selenium.webdriver.chrome.options import Options
+    from webdriver_manager.chrome import ChromeDriverManager
     chrome_options = Options()
     #chrome_options.add_argument("--headless")
     if args.profile_path:
@@ -54,7 +55,8 @@ def main():
   #    file.write(',Upvotes,Comments,Awards\n')
 
   print('Initializing Chrome...', end='\r')
-  with webdriver.Chrome(options=chrome_options) as driver:
+  #with webdriver.Chrome(options=chrome_options) as driver:
+  with webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options) as driver:
     while True:
       print('Grabbing web page...  ', end='\r')
       driver.get(args.url)
