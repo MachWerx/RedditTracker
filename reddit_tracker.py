@@ -67,25 +67,28 @@ def main():
       # time stamp data
       data = [time.strftime('%Y/%m/%d %H:%M:%S')]
 
-      # get upvotes and comment count
-      description = tree.xpath('//meta[@property="og:description"]/@content')[0]
-      votes = description.split(' votes ')[0].replace(',','')
-      data.append(votes)
-      comments = description.split('and')[1].split(' ')[1].replace(',','')
-      data.append(comments)
+      try:
+        # get upvotes and comment count
+        description = tree.xpath('//meta[@property="og:description"]/@content')[0]
+        votes = description.split(' votes ')[0].replace(',','')
+        data.append(votes)
+        comments = description.split('and')[1].split(' ')[1].replace(',','')
+        data.append(comments)
 
-      # find badges
-      main_post = tree.xpath('//*[@class="' + args.post_class + '"]')[0]
-      award_ids = [s for s in main_post.xpath('.//*/@id') if 'PostAwardBadges' in s]
-      for award_id in award_ids:
-        award = main_post.xpath('.//*[@id="' + award_id + '"]')[0]
-        badge_type = award.xpath('.//@alt')[0]
-        data.append(badge_type)
-        badge_count = award.getparent()[1].text
-        if badge_count:
-          data.append(badge_count)
-        else:
-          data.append('1')
+        # find badges
+        main_post = tree.xpath('//*[@class="' + args.post_class + '"]')[0]
+        award_ids = [s for s in main_post.xpath('.//*/@id') if 'PostAwardBadges' in s]
+        for award_id in award_ids:
+          award = main_post.xpath('.//*[@id="' + award_id + '"]')[0]
+          badge_type = award.xpath('.//@alt')[0]
+          data.append(badge_type)
+          badge_count = award.getparent()[1].text
+          if badge_count:
+            data.append(badge_count)
+          else:
+            data.append('1')
+      except IndexError as e:
+        print('Index error at ', data[0])
       if len(data) > 1:
         stats = ','.join(data)
         with open(args.logfile, 'a') as file:
